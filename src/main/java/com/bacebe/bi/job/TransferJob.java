@@ -10,7 +10,7 @@ import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import java.util.HashMap;
 
 
-public class RechargeJob {
+public class TransferJob {
 
 
 
@@ -20,11 +20,11 @@ public class RechargeJob {
         HashMap<String, String> stringStringHashMap = new HashMap<>();
         streamExecutionEnvironment.getConfig().setGlobalJobParameters(ParameterTool.fromMap(stringStringHashMap));
         // 获取socket输入数据
-        RocketSource rocketSource=new RocketSource("54.249.65.169",9876,"BI-RECHARGE","BI-RECHARGE");
+        RocketSource rocketSource=new RocketSource("54.249.65.169",9876,"BI-TRANSFER","BI-TRANSFER");
         DataStreamSource<Object> textStream = streamExecutionEnvironment.addSource(rocketSource);
-        SinkFunction sink = new MongodbSink("127.0.0.1",27017,"bi","recharge");
+        SinkFunction sink = new MongodbSink("127.0.0.1",27017,"bi","transfer");
         textStream.addSink(sink);
         // 触发任务执行
-        streamExecutionEnvironment.execute("RechargeJob");
+        streamExecutionEnvironment.execute("TransferJob");
     }
 }
