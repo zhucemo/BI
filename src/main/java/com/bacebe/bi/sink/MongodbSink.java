@@ -30,13 +30,16 @@ public class MongodbSink extends RichSinkFunction<String> {
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        mongoClient = new MongoClient(host, port);
+        openDB();
     }
 
     @Override
     public void invoke(String bean, Context context) throws Exception {
         try {
             log.info("sink bean:{}",bean);
+            if(mongoClient==null){
+                openDB();
+            }
             MongoDatabase db = mongoClient.getDatabase(database);
             MongoCollection<Document> t = db.getCollection(collection);
             Document document = new Document();
@@ -44,8 +47,17 @@ public class MongodbSink extends RichSinkFunction<String> {
             t.insertOne(document);
 
         } catch (Exception e) {
+            if (null != mongoClient) {
+                mongoClient.close();
+                mongoClient = null;
+                System.out.println("里面关闭啦！");
+            }
             e.printStackTrace();
         }
+    }
+
+    private void openDB(){
+        mongoClient = new MongoClient(host, port);
     }
 
     @Override
