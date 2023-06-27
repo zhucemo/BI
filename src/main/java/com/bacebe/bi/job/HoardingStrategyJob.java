@@ -1,6 +1,7 @@
 package com.bacebe.bi.job;
 
 import com.bacebe.bi.sink.MongodbSink;
+import com.bacebe.bi.sink.MongodbUpsertSink;
 import com.bacebe.bi.source.RocketSource;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -22,7 +23,7 @@ public class HoardingStrategyJob {
         // 获取socket输入数据
         RocketSource rocketSource=new RocketSource("127.0.0.1",9876,"BI-HOARDING","BI-HOARDING");
         DataStreamSource<Object> textStream = streamExecutionEnvironment.addSource(rocketSource);
-        SinkFunction sink = new MongodbSink("127.0.0.1",27017,"bi","hoarding");
+        SinkFunction sink = new MongodbUpsertSink("127.0.0.1",27017,"bi","hoarding");
         textStream.addSink(sink);
         // 触发任务执行
         streamExecutionEnvironment.execute("hoardingJob");
