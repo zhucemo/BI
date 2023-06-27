@@ -32,14 +32,15 @@ public class HoardingStrategyJob {
         RocketSource rocketSource=new RocketSource("127.0.0.1",9876,"BI-HOARDING","BI-HOARDING");
         DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
         SingleOutputStreamOperator<StrategyDocument> strategyDocumentDataStreamSource = textStream.flatMap((FlatMapFunction<String, StrategyDocument>) (value, out) -> {
-            JSONObject jsonObject = JSON.parseObject(value);
+
+            HoardingBiData hoardingBiData = JSON.parseObject(value,HoardingBiData.class);
             StrategyDocument strategyDocument = new StrategyDocument();
-            strategyDocument.setId("100_" + jsonObject.getLong("id"));
+            strategyDocument.setId("100_" + hoardingBiData.getId());
             strategyDocument.setType(100);
             strategyDocument.setAddressType(100);
             strategyDocument.setFees(new JSONObject());
             //TODO 映射字段
-            HoardingBiData hoardingBiData=JSON.parseObject(value,HoardingBiData.class);
+
             strategyDocument.setAddress(hoardingBiData.getAddress());
             strategyDocument.setAviCoinAmount(hoardingBiData.getRemainAmount().stripTrailingZeros().toPlainString());
             strategyDocument.setEndTime(new Date(hoardingBiData.getEndTime()));
