@@ -2,6 +2,7 @@ package com.bacebe.bi.job;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.bacebe.bi.model.HoardingBiData;
 import com.bacebe.bi.model.StrategyDocument;
 import com.bacebe.bi.sink.MongodbSink;
 import com.bacebe.bi.sink.MongodbUpsertSink;
@@ -14,6 +15,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.HashMap;
 
 
@@ -37,9 +39,14 @@ public class HoardingStrategyJob {
             strategyDocument.setAddressType(100);
             strategyDocument.setFees(new JSONObject());
             //TODO 映射字段
-
-
-
+            HoardingBiData hoardingBiData=JSON.parseObject(value,HoardingBiData.class);
+            strategyDocument.setAddress(hoardingBiData.getAddress());
+            strategyDocument.setAviCoinAmount(hoardingBiData.getRemainAmount().stripTrailingZeros().toPlainString());
+            strategyDocument.setEndTime(new Date(hoardingBiData.getEndTime()));
+            strategyDocument.setCumulativeUsageAmount(hoardingBiData.getProfitAmount().stripTrailingZeros().toPlainString());
+            strategyDocument.setUnsoldCoinAmount(hoardingBiData.getNotTradedAmount().stripTrailingZeros().toPlainString());
+            strategyDocument.setStartTime(new Date(hoardingBiData.getCreatedTime()));
+            strategyDocument.setStatus(hoardingBiData.getStatus());
             out.collect(strategyDocument);
         });
         SinkFunction sink = new MongodbUpsertSink("127.0.0.1",27017,"bi","strategy");
