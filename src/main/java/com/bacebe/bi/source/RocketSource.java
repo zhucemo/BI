@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 
 @Slf4j
-public class RocketSource implements SourceFunction<Object> {
+public class RocketSource implements SourceFunction<String> {
     private Logger logger = LoggerFactory.getLogger(RocketSource.class);
 
     private static DefaultMQPushConsumer consumer;
@@ -27,7 +27,7 @@ public class RocketSource implements SourceFunction<Object> {
 
     private boolean isRunning = true;
 
-    public void run(SourceContext<Object> ctx) throws Exception {
+    public void run(SourceContext<String> ctx) throws Exception {
         this.consumer= new DefaultMQPushConsumer(group);
         System.out.println(host+":"+port);
         consumer.setNamesrvAddr(host+":"+port);
