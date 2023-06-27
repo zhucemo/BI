@@ -29,7 +29,7 @@ public class RocketTestJob implements CommandLineRunner {
         stringStringHashMap.put("t", "----------------------->t");
         streamExecutionEnvironment.getConfig().setGlobalJobParameters(ParameterTool.fromMap(stringStringHashMap));
         // 获取socket输入数据
-        DataStreamSource<Object> textStream = streamExecutionEnvironment.addSource(rocketSource);
+        DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
 
 
         SinkFunction sink = new MongoSink();

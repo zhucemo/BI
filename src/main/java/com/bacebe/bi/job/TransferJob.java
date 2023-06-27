@@ -21,7 +21,7 @@ public class TransferJob {
         streamExecutionEnvironment.getConfig().setGlobalJobParameters(ParameterTool.fromMap(stringStringHashMap));
         // 获取socket输入数据
         RocketSource rocketSource=new RocketSource("127.0.0.1",9876,"BI-TRANSFER","BI-TRANSFER");
-        DataStreamSource<Object> textStream = streamExecutionEnvironment.addSource(rocketSource);
+        DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
         SinkFunction sink = new MongodbSink("127.0.0.1",27017,"bi","transfer");
         textStream.addSink(sink);
         // 触发任务执行
