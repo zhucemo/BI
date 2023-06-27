@@ -48,6 +48,7 @@ public class HoardingStrategyJob {
             strategyDocument.setUnsoldCoinAmount(hoardingBiData.getNotTradedAmount().stripTrailingZeros().toPlainString());
             strategyDocument.setStartTime(new Date(hoardingBiData.getCreatedTime()));
             strategyDocument.setStatus(hoardingBiData.getStatus());
+            strategyDocument.setOriCoinAmount(hoardingBiData.getAmount().stripTrailingZeros().toPlainString());
             out.collect(strategyDocument);
         });
         SinkFunction sink = new MongodbUpsertSink("127.0.0.1",27017,"bi","strategy");
