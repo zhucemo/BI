@@ -40,7 +40,9 @@ public class HoardingStrategyJob {
             strategyDocument.setAddressType(100);
             strategyDocument.setFees(new JSONObject());
             //TODO 映射字段
-
+            strategyDocument.getFees().put(hoardingBiData.getGoodsO(),hoardingBiData.getGoodsOFee().toPlainString());
+            strategyDocument.getFees().put(hoardingBiData.getGoodsT(),hoardingBiData.getGoodsTFee().toPlainString());
+            strategyDocument.getFees().put("USDT",hoardingBiData.getUsdtFee().toPlainString());
             strategyDocument.setAddress(hoardingBiData.getAddress());
             strategyDocument.setAviCoinAmount(hoardingBiData.getRemainAmount().stripTrailingZeros().toPlainString());
             strategyDocument.setEndTime(new Date(hoardingBiData.getEndTime()));
