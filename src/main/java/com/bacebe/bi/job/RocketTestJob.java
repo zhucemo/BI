@@ -1,3 +1,4 @@
+/*
 package com.bacebe.bi.job;
 
 import com.bacebe.bi.sink.MongoSink;
@@ -40,3 +41,4 @@ public class RocketTestJob implements CommandLineRunner {
         streamExecutionEnvironment.execute("RocketTestJob");
     }
 }
+*/
