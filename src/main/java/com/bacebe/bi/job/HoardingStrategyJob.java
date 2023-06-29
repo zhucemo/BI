@@ -33,7 +33,7 @@ public class HoardingStrategyJob {
         // 获取socket输入数据
         RocketSource rocketSource=new RocketSource("127.0.0.1",9876,"BI-HOARDING","BI-HOARDING");
         DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
-        SingleOutputStreamOperator<StrategyDocument> strategyDocumentDataStreamSource = textStream.flatMap((String value, Collector<StrategyDocument> out) -> {
+        SingleOutputStreamOperator<StrategyDocument> strategyDocumentDataStreamSource = textStream.map((String value) -> {
 
             HoardingBiData hoardingBiData = JSON.parseObject(value,HoardingBiData.class);
             StrategyDocument strategyDocument = new StrategyDocument();
@@ -53,7 +53,7 @@ public class HoardingStrategyJob {
             strategyDocument.setStartTime(new Date(hoardingBiData.getCreatedTime()));
             strategyDocument.setStatus(hoardingBiData.getStatus());
             strategyDocument.setOriCoinAmount(hoardingBiData.getAmount().stripTrailingZeros().toPlainString());
-            out.collect(strategyDocument);
+            return strategyDocument;
         }).returns(TypeInformation.of(StrategyDocument.class)).name("映射囤币");;
         SinkFunction sink = new MongodbUpsertSink("127.0.0.1",27017,"bi","strategy");
         strategyDocumentDataStreamSource.addSink(sink);

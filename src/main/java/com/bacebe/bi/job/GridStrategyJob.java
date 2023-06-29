@@ -29,7 +29,7 @@ public class GridStrategyJob {
         // 获取socket输入数据
         RocketSource rocketSource=new RocketSource("127.0.0.1",9876,"BI_GRID","BI_GRID");
         DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
-        SingleOutputStreamOperator<StrategyDocument> strategyDocumentDataStreamSource = textStream.flatMap((String value, Collector<StrategyDocument> out) -> {
+        SingleOutputStreamOperator<StrategyDocument> strategyDocumentDataStreamSource = textStream.map((String value) -> {
             JSONObject jsonObject = JSON.parseObject(value);
             StrategyDocument strategyDocument = new StrategyDocument();
             strategyDocument.setId("200_" + jsonObject.getLong("id"));
@@ -47,7 +47,7 @@ public class GridStrategyJob {
             strategyDocument.setStartTime(jsonObject.getDate("createdAt"));
             strategyDocument.setOriCoinAmount(jsonObject.getBigDecimal("oriAmount").toPlainString());
             strategyDocument.setType(200);
-            out.collect(strategyDocument);
+            return strategyDocument;
         }).returns(TypeInformation.of(StrategyDocument.class)).name("映射网格");
         SinkFunction sink = new MongodbUpsertSink("127.0.0.1",27017,"bi","strategy");
         strategyDocumentDataStreamSource.addSink(sink);
