@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.bacebe.bi.model.StrategyDocument;
 import com.bacebe.bi.sink.MongodbUpsertSink;
 import com.bacebe.bi.source.RocketSource;
-import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -29,7 +29,7 @@ public class GridStrategyJob {
         // 获取socket输入数据
         RocketSource rocketSource=new RocketSource("127.0.0.1",9876,"BI_GRID","BI_GRID");
         DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
-        SingleOutputStreamOperator<StrategyDocument> strategyDocumentDataStreamSource = textStream.flatMap((FlatMapFunction<String, StrategyDocument>) (value, out) -> {
+        SingleOutputStreamOperator<StrategyDocument> strategyDocumentDataStreamSource = textStream.flatMap((String value, Collector<StrategyDocument> out) -> {
             JSONObject jsonObject = JSON.parseObject(value);
             StrategyDocument strategyDocument = new StrategyDocument();
             strategyDocument.setId("200_" + jsonObject.getLong("id"));
@@ -48,7 +48,7 @@ public class GridStrategyJob {
             strategyDocument.setOriCoinAmount(jsonObject.getBigDecimal("oriAmount").toPlainString());
             strategyDocument.setType(200);
             out.collect(strategyDocument);
-        });
+        }).returns(TypeInformation.of(StrategyDocument.class)).name("映射网格");
         SinkFunction sink = new MongodbUpsertSink("127.0.0.1",27017,"bi","strategy");
         strategyDocumentDataStreamSource.addSink(sink);
         // 触发任务执行

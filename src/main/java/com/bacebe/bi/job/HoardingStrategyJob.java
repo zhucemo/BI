@@ -8,11 +8,13 @@ import com.bacebe.bi.sink.MongodbSink;
 import com.bacebe.bi.sink.MongodbUpsertSink;
 import com.bacebe.bi.source.RocketSource;
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.apache.flink.util.Collector;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -31,7 +33,7 @@ public class HoardingStrategyJob {
         // 获取socket输入数据
         RocketSource rocketSource=new RocketSource("127.0.0.1",9876,"BI-HOARDING","BI-HOARDING");
         DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
-        SingleOutputStreamOperator<StrategyDocument> strategyDocumentDataStreamSource = textStream.flatMap((FlatMapFunction<String, StrategyDocument>) (value, out) -> {
+        SingleOutputStreamOperator<StrategyDocument> strategyDocumentDataStreamSource = textStream.flatMap((String value, Collector<StrategyDocument> out) -> {
 
             HoardingBiData hoardingBiData = JSON.parseObject(value,HoardingBiData.class);
             StrategyDocument strategyDocument = new StrategyDocument();
@@ -52,7 +54,7 @@ public class HoardingStrategyJob {
             strategyDocument.setStatus(hoardingBiData.getStatus());
             strategyDocument.setOriCoinAmount(hoardingBiData.getAmount().stripTrailingZeros().toPlainString());
             out.collect(strategyDocument);
-        });
+        }).returns(TypeInformation.of(StrategyDocument.class)).name("映射囤币");;
         SinkFunction sink = new MongodbUpsertSink("127.0.0.1",27017,"bi","strategy");
         strategyDocumentDataStreamSource.addSink(sink);
         // 触发任务执行
