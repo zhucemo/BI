@@ -4,6 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.bacebe.bi.source.RocketSource;
 import com.bacebe.bi.window.ProfitWindow;
+import org.apache.flink.api.common.typeinfo.TypeHint;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -30,15 +33,15 @@ public class ProfitJob {
         HashMap<String, String> stringStringHashMap = new HashMap<>();
         streamExecutionEnvironment.getConfig().setGlobalJobParameters(ParameterTool.fromMap(stringStringHashMap));
         // 获取socket输入数据
-        RocketSource rocketSource=new RocketSource("127.0.0.1",9876,"BI_PROFIT","BI_PROFIT");
+        RocketSource rocketSource = new RocketSource("127.0.0.1",9876,"BI_PROFIT","BI_PROFIT");
         DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
         SingleOutputStreamOperator<Tuple2<String, BigDecimal>> singleOutputStreamOperator = textStream.map((String value) -> {
             JSONObject jsonObject = JSON.parseObject(value);
             return new Tuple2<> (jsonObject.getString("address"), jsonObject.getBigDecimal("profit"));
-        });
+        }).returns(Types.TUPLE(Types.STRING, TypeInformation.of(BigDecimal.class)));
         KeyedStream<Tuple2<String, BigDecimal>, String> tuple2StringKeyedStream = singleOutputStreamOperator.keyBy((KeySelector<Tuple2<String, BigDecimal>, String>) value -> value.getField(0));
         WindowedStream<Tuple2<String, BigDecimal>, String, TimeWindow> window = tuple2StringKeyedStream.window(SlidingEventTimeWindows.of(Time.minutes(10), Time.minutes(1)));
-        window.apply(new ProfitWindow("127.0.0.1",9876,"SYSTEM_PROFIT_SLID")).print();
+        window.apply(new ProfitWindow("127.0.0.1",9876,"SYSTEM_PROFIT_SLID"));
         // 触发任务执行
         streamExecutionEnvironment.execute("ProfitJob");
     }
