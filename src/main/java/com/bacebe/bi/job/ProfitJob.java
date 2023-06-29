@@ -2,6 +2,7 @@ package com.bacebe.bi.job;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.bacebe.bi.sink.RocketSink;
 import com.bacebe.bi.source.RocketSource;
 import com.bacebe.bi.window.ProfitWindow;
 import org.apache.flink.api.common.typeinfo.TypeHint;
@@ -41,7 +42,7 @@ public class ProfitJob {
         }).returns(Types.TUPLE(Types.STRING, TypeInformation.of(BigDecimal.class)));
         KeyedStream<Tuple2<String, BigDecimal>, String> tuple2StringKeyedStream = singleOutputStreamOperator.keyBy((KeySelector<Tuple2<String, BigDecimal>, String>) value -> value.getField(0));
         WindowedStream<Tuple2<String, BigDecimal>, String, TimeWindow> window = tuple2StringKeyedStream.window(SlidingEventTimeWindows.of(Time.minutes(10), Time.minutes(1)));
-        window.apply(new ProfitWindow("127.0.0.1",9876,"SYSTEM_PROFIT_SLID"));
+        window.apply(new ProfitWindow()).addSink(new RocketSink("127.0.0.1",9876,"SYSTEM_PROFIT_SLID"));
         // 触发任务执行
         streamExecutionEnvironment.execute("ProfitJob");
     }
