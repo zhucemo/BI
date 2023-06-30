@@ -34,8 +34,9 @@ public class RocketSource implements SourceFunction<String> {
         consumer.subscribe(topic, "*");
         consumer.registerMessageListener((MessageListenerConcurrently) (msgs, context) -> {
             msgs.forEach(msg -> {
-                log.info("receive msg:"+msg);
-                ctx.collect(new String(msg.getBody()));
+                String data = new String(msg.getBody());
+                log.info("receive msg:" + data);
+                ctx.collect(data);
             });
             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         });
@@ -43,7 +44,6 @@ public class RocketSource implements SourceFunction<String> {
 
         while (isRunning) {
             Thread.sleep(5000);
-            logger.info("休眠");
         }
 
     }
