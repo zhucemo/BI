@@ -38,10 +38,6 @@ public class MongodbUpsertSink extends RichSinkFunction<StrategyDocument> {
     @Override
     public void invoke(StrategyDocument bean, Context context) throws Exception {
         try {
-            log.info("sink bean:{}",bean);
-            if(mongoClient==null){
-                openDB();
-            }
             MongoDatabase db = mongoClient.getDatabase(database);
             MongoCollection<Document> t = db.getCollection(collection);
             Document document = new Document();
@@ -53,12 +49,7 @@ public class MongodbUpsertSink extends RichSinkFunction<StrategyDocument> {
             t.updateOne(filter, document, updateOptions);
 
         } catch (Exception e) {
-            if (null != mongoClient) {
-                mongoClient.close();
-                mongoClient = null;
-                System.out.println("里面关闭啦！");
-            }
-            e.printStackTrace();
+            log.warn("数据存储失败, collection: {}, data: {}", collection, bean, e);
         }
     }
 
