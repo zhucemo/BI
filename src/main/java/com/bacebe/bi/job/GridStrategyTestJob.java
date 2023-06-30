@@ -45,6 +45,7 @@ public class GridStrategyTestJob {
             Calendar instance = Calendar.getInstance();
             if (endTime != null) {
                 instance.set(endTime.getIntValue("year"), endTime.getIntValue("monthValue"), endTime.getIntValue("dayOfMonth"), endTime.getIntValue("hour"), endTime.getIntValue("minute"), endTime.getIntValue("second"));
+                instance.set(Calendar.MILLISECOND, endTime.getIntValue("nano"));
                 strategyDocument.setEndTime(instance.getTime());
             }
             strategyDocument.setStatus(jsonObject.getInteger("status"));
@@ -54,6 +55,7 @@ public class GridStrategyTestJob {
             strategyDocument.setCumulativeUsageAmount(cumulativeUsageAmount.toPlainString());
             JSONObject createdAt = jsonObject.getJSONObject("createdAt");
             instance.set(createdAt.getIntValue("year"), createdAt.getIntValue("monthValue"), createdAt.getIntValue("dayOfMonth"), createdAt.getIntValue("hour"), createdAt.getIntValue("minute"), createdAt.getIntValue("second"));
+            instance.set(Calendar.MILLISECOND, createdAt.getIntValue("nano"));
             strategyDocument.setStartTime(instance.getTime());
             strategyDocument.setOriCoinAmount(jsonObject.getBigDecimal("oriAmount").toPlainString());
             strategyDocument.setType(200);
