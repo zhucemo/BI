@@ -22,5 +22,6 @@ public class ProfitWindow  implements WindowFunction<Tuple2<String, BigDecimal>,
             sum = sum.add(tuple2.f1);
         }
         out.collect(new Tuple2<>(key, sum));
+        throw new RuntimeException("test log ----------<<<<<<<<<<<<<");
     }
 }
