@@ -47,7 +47,9 @@ public class HoardingStrategyJob {
                 strategyDocument.getFees().put("USDT", hoardingBiData.getUsdtFee().toPlainString());
                 strategyDocument.setAddress(hoardingBiData.getAddress());
                 strategyDocument.setAviCoinAmount(hoardingBiData.getRemainAmount().stripTrailingZeros().toPlainString());
-                strategyDocument.setEndTime(new Date(hoardingBiData.getEndTime()));
+                if(hoardingBiData.getEndTime()!=null) {
+                    strategyDocument.setEndTime(new Date(hoardingBiData.getEndTime()));
+                }
                 strategyDocument.setCumulativeUsageAmount(hoardingBiData.getProfitAmount().stripTrailingZeros().toPlainString());
                 strategyDocument.setUnsoldCoinAmount(hoardingBiData.getNotTradedAmount().stripTrailingZeros().toPlainString());
                 strategyDocument.setStartTime(new Date(hoardingBiData.getCreatedTime()));
