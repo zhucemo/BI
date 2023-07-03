@@ -7,7 +7,6 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 
 public class ProfitWindow  implements WindowFunction<Tuple2<String, BigDecimal>, Tuple2<String, BigDecimal>, String, TimeWindow> {
 
@@ -22,6 +21,5 @@ public class ProfitWindow  implements WindowFunction<Tuple2<String, BigDecimal>,
             sum = sum.add(tuple2.f1);
         }
         out.collect(new Tuple2<>(key, sum));
-        throw new RuntimeException("test log ----------<<<<<<<<<<<<<");
     }
 }
