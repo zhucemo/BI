@@ -34,32 +34,27 @@ public class HoardingStrategyJob {
         RocketSource rocketSource=new RocketSource("127.0.0.1",9876,"BI-HOARDING","BI-HOARDING");
         DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
         SingleOutputStreamOperator<StrategyDocument> strategyDocumentDataStreamSource = textStream.map((String value) -> {
-            try {
-                HoardingBiData hoardingBiData = JSON.parseObject(value, HoardingBiData.class);
-                StrategyDocument strategyDocument = new StrategyDocument();
-                strategyDocument.setId("100_" + hoardingBiData.getId());
-                strategyDocument.setType(100);
-                strategyDocument.setAddressType(100);
-                strategyDocument.setFees(new JSONObject());
-                //TODO 映射字段
-                strategyDocument.getFees().put(hoardingBiData.getGoodsO(), hoardingBiData.getGoodsOFee().toPlainString());
-                strategyDocument.getFees().put(hoardingBiData.getGoodsT(), hoardingBiData.getGoodsTFee().toPlainString());
-                strategyDocument.getFees().put("USDT", hoardingBiData.getUsdtFee().toPlainString());
-                strategyDocument.setAddress(hoardingBiData.getAddress());
-                strategyDocument.setAviCoinAmount(hoardingBiData.getRemainAmount().stripTrailingZeros().toPlainString());
-                if(hoardingBiData.getEndTime()!=null) {
-                    strategyDocument.setEndTime(new Date(hoardingBiData.getEndTime()));
-                }
-                strategyDocument.setCumulativeUsageAmount(hoardingBiData.getProfitAmount().stripTrailingZeros().toPlainString());
-                strategyDocument.setUnsoldCoinAmount(hoardingBiData.getNotTradedAmount().stripTrailingZeros().toPlainString());
-                strategyDocument.setStartTime(new Date(hoardingBiData.getCreatedTime()));
-                strategyDocument.setStatus(hoardingBiData.getStatus());
-                strategyDocument.setOriCoinAmount(hoardingBiData.getAmount().stripTrailingZeros().toPlainString());
-                return strategyDocument;
-            }catch (Exception e){
-                e.printStackTrace();
-                throw e;
+            HoardingBiData hoardingBiData = JSON.parseObject(value, HoardingBiData.class);
+            StrategyDocument strategyDocument = new StrategyDocument();
+            strategyDocument.setId("100_" + hoardingBiData.getId());
+            strategyDocument.setType(100);
+            strategyDocument.setAddressType(100);
+            strategyDocument.setFees(new JSONObject());
+            //TODO 映射字段
+            strategyDocument.getFees().put(hoardingBiData.getGoodsO(), hoardingBiData.getGoodsOFee().toPlainString());
+            strategyDocument.getFees().put(hoardingBiData.getGoodsT(), hoardingBiData.getGoodsTFee().toPlainString());
+            strategyDocument.getFees().put("USDT", hoardingBiData.getUsdtFee().toPlainString());
+            strategyDocument.setAddress(hoardingBiData.getAddress());
+            strategyDocument.setAviCoinAmount(hoardingBiData.getRemainAmount().stripTrailingZeros().toPlainString());
+            if(hoardingBiData.getEndTime()!=null) {
+                strategyDocument.setEndTime(new Date(hoardingBiData.getEndTime()));
             }
+            strategyDocument.setCumulativeUsageAmount(hoardingBiData.getProfitAmount().stripTrailingZeros().toPlainString());
+            strategyDocument.setUnsoldCoinAmount(hoardingBiData.getNotTradedAmount().stripTrailingZeros().toPlainString());
+            strategyDocument.setStartTime(new Date(hoardingBiData.getCreatedTime()));
+            strategyDocument.setStatus(hoardingBiData.getStatus());
+            strategyDocument.setOriCoinAmount(hoardingBiData.getAmount().stripTrailingZeros().toPlainString());
+            return strategyDocument;
         }).returns(TypeInformation.of(StrategyDocument.class)).name("映射囤币");;
         SinkFunction sink = new MongodbUpsertSink("127.0.0.1",27017,"bi","strategy");
         strategyDocumentDataStreamSource.addSink(sink);
