@@ -40,7 +40,6 @@ public class ProfitJob {
         DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
         SingleOutputStreamOperator<Tuple2<String, BigDecimal>> singleOutputStreamOperator = textStream.map((String value) -> {
             JSONObject jsonObject = JSON.parseObject(value);
-            log.info("profit:{}", jsonObject);
             return new Tuple2<> (jsonObject.getString("address"), jsonObject.getBigDecimal("profit"));
         }).returns(Types.TUPLE(Types.STRING, TypeInformation.of(BigDecimal.class)));
         KeyedStream<Tuple2<String, BigDecimal>, String> tuple2StringKeyedStream = singleOutputStreamOperator.keyBy((KeySelector<Tuple2<String, BigDecimal>, String>) value -> value.getField(0));
