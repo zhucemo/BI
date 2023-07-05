@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.bacebe.bi.sink.RocketSink;
 import com.bacebe.bi.source.RocketSource;
 import com.bacebe.bi.window.ProfitWindow;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -24,6 +25,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 
 
+@Slf4j
 public class ProfitJob {
 
 
@@ -38,6 +40,7 @@ public class ProfitJob {
         DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
         SingleOutputStreamOperator<Tuple2<String, BigDecimal>> singleOutputStreamOperator = textStream.map((String value) -> {
             JSONObject jsonObject = JSON.parseObject(value);
+            log.info("profit:{}", jsonObject);
             return new Tuple2<> (jsonObject.getString("address"), jsonObject.getBigDecimal("profit"));
         }).returns(Types.TUPLE(Types.STRING, TypeInformation.of(BigDecimal.class)));
         KeyedStream<Tuple2<String, BigDecimal>, String> tuple2StringKeyedStream = singleOutputStreamOperator.keyBy((KeySelector<Tuple2<String, BigDecimal>, String>) value -> value.getField(0));
