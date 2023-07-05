@@ -17,6 +17,7 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
@@ -43,7 +44,7 @@ public class ProfitJob {
             return new Tuple2<> (jsonObject.getString("address"), jsonObject.getBigDecimal("profit"));
         }).returns(Types.TUPLE(Types.STRING, TypeInformation.of(BigDecimal.class)));
         KeyedStream<Tuple2<String, BigDecimal>, String> tuple2StringKeyedStream = singleOutputStreamOperator.keyBy((KeySelector<Tuple2<String, BigDecimal>, String>) value -> value.getField(0));
-        WindowedStream<Tuple2<String, BigDecimal>, String, TimeWindow> window = tuple2StringKeyedStream.window(SlidingEventTimeWindows.of(Time.minutes(10), Time.minutes(1)));
+        WindowedStream<Tuple2<String, BigDecimal>, String, TimeWindow> window = tuple2StringKeyedStream.window(SlidingProcessingTimeWindows.of(Time.minutes(10), Time.minutes(1)));
         window.apply(new ProfitWindow()).addSink(new RocketSink("127.0.0.1",9876,"SYSTEM_PROFIT_SLID"));
         // 触发任务执行
         streamExecutionEnvironment.execute("ProfitJob");
