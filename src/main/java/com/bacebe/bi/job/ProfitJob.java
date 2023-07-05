@@ -1,12 +1,11 @@
 package com.bacebe.bi.job;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.bacebe.bi.sink.RocketSink;
 import com.bacebe.bi.source.RocketSource;
 import com.bacebe.bi.window.ProfitWindow;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.functions.KeySelector;
