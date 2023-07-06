@@ -40,6 +40,7 @@ public class ProfitJob {
         RocketSource rocketSource = new RocketSource("127.0.0.1",9876,"BI_PROFIT","BI_PROFIT");
         DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
         SingleOutputStreamOperator<Tuple2<String, BigDecimal>> singleOutputStreamOperator = textStream.flatMap((String value, Collector<Tuple2<String, BigDecimal>> out) -> {
+            log.info("map profit----------> {}", value);
             JSONObject jsonObject = JSON.parseObject(value);
             if (jsonObject == null || jsonObject.getString("address") == null || jsonObject.getBigDecimal("profit") == null) {
                 return;

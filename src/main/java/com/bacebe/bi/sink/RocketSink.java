@@ -48,6 +48,7 @@ public class RocketSink extends RichSinkFunction<Tuple2<String, BigDecimal>> {
         Message msg = new Message(topic,
                 topic,
                 profitPojo.getBytes(RemotingHelper.DEFAULT_CHARSET));
+        log.info("sink profit----------> {}", bean);
         producer.send(msg);
     }
 
