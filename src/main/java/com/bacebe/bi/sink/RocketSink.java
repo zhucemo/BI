@@ -49,7 +49,6 @@ public class RocketSink extends RichSinkFunction<Tuple2<String, BigDecimal>> {
         Message msg = new Message(topic,
                 topic,
                 JSON.toJSONBytes(profitPojo));
-        log.info("sink profit----------> {}", bean);
         producer.send(msg);
     }
 
