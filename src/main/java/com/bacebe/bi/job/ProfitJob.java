@@ -40,16 +40,15 @@ public class ProfitJob {
         RocketSource rocketSource = new RocketSource("127.0.0.1",9876,"BI_PROFIT","BI_PROFIT");
         DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
         SingleOutputStreamOperator<Tuple2<String, BigDecimal>> singleOutputStreamOperator = textStream.flatMap((String value, Collector<Tuple2<String, BigDecimal>> out) -> {
-            log.info("map profit----------> {}", value);
             JSONObject jsonObject = JSON.parseObject(value);
             if (jsonObject == null || jsonObject.getString("address") == null || jsonObject.getBigDecimal("profit") == null) {
                 return;
             }
             out.collect(new Tuple2<> (jsonObject.getString("address"), jsonObject.getBigDecimal("profit")));
-        }).returns(Types.TUPLE(Types.STRING, TypeInformation.of(BigDecimal.class)));
+        }).returns(Types.TUPLE(Types.STRING, TypeInformation.of(BigDecimal.class))).name("收益数据收集");
         KeyedStream<Tuple2<String, BigDecimal>, String> tuple2StringKeyedStream = singleOutputStreamOperator.keyBy((KeySelector<Tuple2<String, BigDecimal>, String>) value -> value.getField(0));
         WindowedStream<Tuple2<String, BigDecimal>, String, TimeWindow> window = tuple2StringKeyedStream.window(SlidingProcessingTimeWindows.of(Time.minutes(10), Time.minutes(1)));
-        window.apply(new ProfitWindow()).addSink(new RocketSink("127.0.0.1",9876,"SYSTEM_PROFIT_SLID"));
+        window.apply(new ProfitWindow()).addSink(new RocketSink("127.0.0.1",9876,"SYSTEM_PROFIT_SLID")).name("通知报警");
         // 触发任务执行
         streamExecutionEnvironment.execute("ProfitJob");
     }

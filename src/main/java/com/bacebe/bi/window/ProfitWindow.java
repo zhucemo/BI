@@ -21,10 +21,8 @@ public class ProfitWindow  implements WindowFunction<Tuple2<String, BigDecimal>,
     public void apply(String key, TimeWindow window, Iterable<Tuple2<String, BigDecimal>> input, Collector<Tuple2<String, BigDecimal>> out) throws Exception {
         BigDecimal sum = BigDecimal.ZERO;
         for(Tuple2<String,BigDecimal> tuple2 : input){
-            log.info("window profit----------> {}", tuple2);
             sum = sum.add(tuple2.f1);
         }
-        log.info("profit ---> {}", sum.toPlainString());
         out.collect(new Tuple2<>(key, sum));
     }
 }
