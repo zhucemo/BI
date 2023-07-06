@@ -20,6 +20,7 @@ import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindow
 import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.util.Collector;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -38,9 +39,12 @@ public class ProfitJob {
         // 获取socket输入数据
         RocketSource rocketSource = new RocketSource("127.0.0.1",9876,"BI_PROFIT","BI_PROFIT");
         DataStreamSource<String> textStream = streamExecutionEnvironment.addSource(rocketSource);
-        SingleOutputStreamOperator<Tuple2<String, BigDecimal>> singleOutputStreamOperator = textStream.map((String value) -> {
+        SingleOutputStreamOperator<Tuple2<String, BigDecimal>> singleOutputStreamOperator = textStream.flatMap((String value, Collector<Tuple2<String, BigDecimal>> out) -> {
             JSONObject jsonObject = JSON.parseObject(value);
-            return new Tuple2<> (jsonObject.getString("address"), jsonObject.getBigDecimal("profit"));
+            if (jsonObject == null || jsonObject.getString("address") == null || jsonObject.getBigDecimal("profit") == null) {
+                return;
+            }
+            out.collect(new Tuple2<> (jsonObject.getString("address"), jsonObject.getBigDecimal("profit")));
         }).returns(Types.TUPLE(Types.STRING, TypeInformation.of(BigDecimal.class)));
         KeyedStream<Tuple2<String, BigDecimal>, String> tuple2StringKeyedStream = singleOutputStreamOperator.keyBy((KeySelector<Tuple2<String, BigDecimal>, String>) value -> value.getField(0));
         WindowedStream<Tuple2<String, BigDecimal>, String, TimeWindow> window = tuple2StringKeyedStream.window(SlidingProcessingTimeWindows.of(Time.minutes(10), Time.minutes(1)));
