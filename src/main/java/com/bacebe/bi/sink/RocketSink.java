@@ -2,6 +2,7 @@ package com.bacebe.bi.sink;
 
 
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -47,7 +48,7 @@ public class RocketSink extends RichSinkFunction<Tuple2<String, BigDecimal>> {
         profitPojo.put("profit", bean.f1);
         Message msg = new Message(topic,
                 topic,
-                profitPojo.getBytes(RemotingHelper.DEFAULT_CHARSET));
+                JSON.toJSONBytes(profitPojo));
         log.info("sink profit----------> {}", bean);
         producer.send(msg);
     }
